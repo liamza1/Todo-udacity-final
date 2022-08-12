@@ -13,12 +13,12 @@ provider:
   runtime: nodejs12.x
 
   stage: ${opt:stage, 'dev'}
-  region: ${opt:region, 'us-west-1'}
+  region: ${opt:region, 'us-east-2'}
 
   environment:
     TODOS_TABLE: Todos-${self:provider.stage}
     INDEX_NAME: USER_ID
-    IMAGES_S3_BUCKET: streakl-serverless-todos-${self:provider.stage}
+    IMAGES_S3_BUCKET: lstreak-serverless-todos-${self:provider.stage}
     SIGNED_URL_EXPIRATION: 300
     AUTH_0_JWKS_URL: https://dev-dskgbgru.us.auth0.com/.well-known/jwks.json
 
@@ -26,7 +26,6 @@ provider:
     lambda: true
     apiGateway: true
 custom:
-
   documentation:
     api:
       info:
@@ -80,6 +79,11 @@ functions:
           cors: true
           authorizer: Auth
           reqValidatorName: RequestBodyValidator
+          documentation:
+            summary: Create a new group
+            description: Create a new group
+            requestModels:
+              'application/json': CreateTodo
     iamRoleStatements:
       - Effect: Allow
         Action:
@@ -204,8 +208,10 @@ resources:
           - AttributeName: createdAt
             AttributeType: S
         KeySchema:
-          - AttributeName: todoId
+          - AttributeName: userId
             KeyType: HASH
+          - AttributeName: todoId
+            KeyType: RANGE
         BillingMode: PAY_PER_REQUEST
         TableName: ${self:provider.environment.TODOS_TABLE}
         GlobalSecondaryIndexes:
